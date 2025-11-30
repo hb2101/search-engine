@@ -49,47 +49,47 @@ async def load_all_messages():
                     if not items:
                         cache_loaded = True
                         message_cache = all_messages
-                        print(f"✅ Loaded {len(message_cache)} messages into cache")
+                        print(f"Loaded {len(message_cache)} messages into cache")
                         return
                     
                     all_messages.extend(items)
                     total = data.get("total", 0)
-                    print(f"📥 Loaded {len(all_messages)}/{total} messages...")
+                    print(f"Loaded {len(all_messages)}/{total} messages...")
                     
                     skip += limit
                     success = True
                     
-                    # Add small delay between requests to avoid rate limiting
+                    # Adding a small delay between requests to avoid rate limiting
                     await asyncio.sleep(1.0)
                     
                     if len(all_messages) >= total:
                         cache_loaded = True
                         message_cache = all_messages
-                        print(f"✅ Loaded {len(message_cache)} messages into cache")
+                        print(f"Loaded {len(message_cache)} messages into cache")
                         return
                         
                 except httpx.HTTPStatusError as e:
-                    if e.response.status_code in [400, 402, 403, 429]:
+                    if e.response.status_code in [400, 402, 403, 429, 404, 401,405]:
                         retry_count += 1
                         wait_time = 5 * (2 ** retry_count)  # Exponential backoff: 2, 4, 8 seconds
-                        print(f"⚠️  Rate limited at skip={skip}. Waiting {wait_time}s before retry {retry_count}/{max_retries}...")
+                        print(f"Rate limited at skip={skip}. Waiting {wait_time}s before retry {retry_count}/{max_retries}...")
                         await asyncio.sleep(wait_time)
                     else:
-                        print(f"❌ Error at skip={skip}: {e}")
+                        print(f"Error at skip={skip}: {e}")
                         break
                 except Exception as e:
-                    print(f"❌ Unexpected error at skip={skip}: {e}")
+                    print(f"Unexpected error at skip={skip}: {e}")
                     retry_count += 1
                     if retry_count < max_retries:
                         await asyncio.sleep(5)
             
             if not success:
-                print(f"⚠️  Failed to load all messages. Loaded {len(all_messages)} so far.")
+                print(f"Failed to load all messages. Loaded {len(all_messages)} so far.")
                 break
         
         message_cache = all_messages
         cache_loaded = True
-        print(f"✅ Loaded {len(message_cache)} messages into cache (partial)")
+        print(f"Loaded {len(message_cache)} messages into cache (partial)")
 
 def search_messages(query: str, skip: int = 0, limit: int = 100) -> Dict[str, Any]:
     """Search messages in cache."""
@@ -116,7 +116,7 @@ def search_messages(query: str, skip: int = 0, limit: int = 100) -> Dict[str, An
 @app.on_event("startup")
 async def startup_event():
     """Load messages on startup."""
-    print("🚀 Starting up... Loading messages into cache")
+    print("Starting up... Loading messages into cache")
     await load_all_messages()
 
 @app.get("/")
