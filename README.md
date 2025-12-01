@@ -148,7 +148,3 @@ Cache common search queries at edge locations using a CDN. This would reduce lat
 ## Implementation Notes
 
 The external API has rate limiting that prevents loading all messages in quick succession. The implementation includes retry logic with exponential backoff to handle these limits gracefully. After testing various strategies, a 1-second delay between requests with extended backoff periods on rate limit errors was found to be effective for loading the full dataset.
-
-## License
-
-MIT
